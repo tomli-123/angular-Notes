@@ -1,0 +1,117 @@
+【hidde】 传入true 或 false 可以控制显示与隐藏
+
+array的循环遍历方法 都是异步的
+
+每次声明一个变量或者属性 都需要配置其类型
+
+ngAfterViewInit 声明周期钩子 dom已渲染完成 可以操作dom
+
+angular可以通过 ViewChild 模块来获取dom元素
+引入ViewChild模块 在本身ts中  在标签中加 #box 
+使用ViewChild来获取的dom元素到本身的nativeElement来取
+
+overflow-x: hidden; 可以使超出盒子x轴的隐藏 并且不带滚动条
+
+angular动画 transform: translate(x,y)  transition: all 2s
+
+angular的服务配置
+1. ng g service services/storage
+2.app.module.ts 中引入创建服务 并声明
+import { StorageService } from './services/storage.service'
+providers:[ StorageService ]
+3.storage.service.ts 文件中定义服务
+即在服务中声明 服务要执行的函数 可以在外部直接调用
+在class StorageService 中配置
+set（key:string,value:any）{
+  value = JSON.stringify(value)
+  localStorage.setItem(key,value)  
+}
+注意点 在获取的时候注意兼容问题
+4.在组件中使用时，在组件中引入
+import { StorageService } from '../../services/storage.service'
+constructor(public storage:StorageService){}
+然后就可以在组件的函数中使用 服务了
+
+在ts中的变量做属性 最好都声明类型 不然会有意想不到的错误
+
+生命周期
+*****ngOnInit 和 vue created比较类似 数据初始化完成 执行 可以用来发请求（）
+ngOnChanges 在父子传值时触发 首次触发一定在ngOnInit之前 ngOnInit在
+ngOnChanges之后触发
+*****ngAfterViewInit 可以操作dom
+ngOnDestory 可以保存用户信息
+
+@viewChild （angular的获取dom封装）
+1.模板中给dom起一个名字 eg #box
+2.在使用的模板中 引入 viewChild装饰器 import { ViewChild } from ‘@angular/core’
+3.在类中获取dom @viewChild('myBox') myBox:any;
+4.在ngAfterViewInit钩子中操作dom
+this.myBox.nativeElement（这里获取的是元素本身）
+5.获取组件 不需要和nativeElement配合使用 直接用this.myBox+方法
+如果是获取dom 需要nativeElement配合使用
+
+父组件给子组件传值
+1.子组件可以获取父组件的数据
+2.子组件可以执行父组件的方法
+子组件给父组件传值
+1.父组件可以获取子组件的数据
+2.父组件可以获取子组件的方法
+非父子组件
+1.组件之间传值
+2.共享方法
+
+父组件给子组件传值
+首先在父组件中传入属性 【title】='title' 
+然后在子组件中引入 input 装饰器 
+最后用input来接受 父组件传来的数据 @input title
+【title】='title' 传数据 【run】='run' 传方法  【home】='this' 传整个父组件 
+子组件给父组件传值
+1.首先在子组件中引入 Output 和 EventEmitter 修饰器
+2.子组件实例化 EventEmitter @Output() private outer=new EventEmitter<string>();
+3.子组件通过 EventEmitter 对象 outer 实例广播数据
+sendParent(){
+// alert('zhixing');
+this.outer.emit('msg from child')
+}
+4.父组件调用子组件的时候，定义接收事件 , outer 就是子组件的 EventEmitter 对象 outer
+<app-header (outer)="runParent($event)"></app-header>
+5.父组件接收到数据会调用自己的 runParent 方法，这个时候就能拿到子组件的数据
+/接收子组件传递过来的数据
+runParent(msg:string){
+alert(msg);
+}
+
+angular Rxjs 的使用
+1.首先配置 Rxjs服务
+2.然后在服务中 引入Observable import { Observable } from 'rxjs' 
+  getRxjsData(){
+    return new Observable((observer)=>{
+      setTimeout(()=>{
+        observer.next('我是Rxjs数据')
+      },3000)
+    })
+  }
+3.采用 observe.next()来监视成功回调 observe.error()来监视失败回调
+4.在组件中使用subscribe 来接受回调结果(成功和失败都会被监听) 形式类似于 then 又叫订阅
+p.subscribe(res=>{console.log(res)})
+5.取消订阅 d.unsubscribe（） 可以取消回调 d是p.subscribe(res=>{console.log(res)})的返回值
+6.Rxjs 可以中途取消 d.unsubscribe 可以发射多个值  有各种工具函数
+6.1.1使用工具函数（管道）就要引入rxjs-compat模块 然后在服务中引入 import 'rxjs/Rx'
+6.1.2在使用管道的组件后者服务封装方法的时候引入Rxjs import{ mao, filter } from 'rxjs/operators'
+6.1.3在p.pipe(filter(vakue)=>{return true})subscribe((data)=>{console.log(data)})
+在pipe中配置管道（filter/map）管道中方法可以一起用 在filter，map就可以用两种方法啦
+ data5.pipe( data5 是Rxjs实例
+      filter(value=>{
+      if(value % 2 === 0){
+        return true
+      }   
+    }),
+    map(value=>{
+      return value*value
+    })  
+    ).subscribe((res)=>{
+      console.log(res)
+    })
+  }
+
+
